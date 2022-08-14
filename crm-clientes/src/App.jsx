@@ -27,3 +27,4 @@ export default App
 // npm i tailwindcss postcss autoprefixer
 //npx tailwindcss init -p
 //npm i react-router-dom
+//npm i  formik yup
