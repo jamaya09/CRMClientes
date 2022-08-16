@@ -1,20 +1,42 @@
 import React from 'react'
 import { Formik, Form, Field } from 'formik'
+import {useNavigate} from 'react-router-dom'
 import * as yup from 'yup'
 import Alerta from './Alerta'
 
 const Formulario = () => {
-    const handleSubmit = (values)=>{
-        console.log(values)
+    const navigate = useNavigate()
+    const handleSubmit = async (values)=>{
+        try {
+            const url = 'http://localhost:4000/clientes'
+           const  respuesta = await fetch(url, {
+                method:'POST',
+                body:JSON.stringify(values),
+                headers: {
+                   "Content-Type": "application/json"
+                }
+            })
+            console.log(respuesta)
+            const resultado = await respuesta.json()
+            console.log(resultado)
+        } catch (error) {
+            console.log(values)
+        }
     }
     const nuevoClienteSchema = yup.object().shape({
         nombre:yup.string()
                             .min(3, 'El nombre es muy corto')
                             .max(40, 'El nombre es muy largo' )
                             .required('Este campo es requerido'),
-        empresa:'',
-        email:'',
-        telefono:'',
+        empresa: yup.string()
+                            .required('Este campo es requerido'),
+        email: yup.string()
+                            .email('E-mail no valido')
+                            .required('Este campo es requerido'),
+        telefono: yup.number()
+                        .positive('Numero')
+                        .integer('Numero no valido')
+                        .typeError('Numero no valido'),
         notas:'',
 
     })
@@ -31,8 +53,10 @@ const Formulario = () => {
                 telefono:'',
                 notas:'',
             }}
-            onSubmit = {(values)=>{
-                handleSubmit(values)
+            onSubmit = { async(values, {resetForm})=>{
+                await handleSubmit(values)
+                resetForm()
+                navigate('/clientes')
             }}
             validationSchema = {nuevoClienteSchema}
         >
@@ -69,6 +93,9 @@ const Formulario = () => {
                                 name = 'empresa' 
                             >
                             </Field>
+                            {errors.empresa && touched.empresa ? (
+                               <Alerta>{errors.empresa }</Alerta>
+                            ): null}
                         </div>
                         <div className=' mt-4'>
                             <label htmlFor="email" className='text-gray-800'>
@@ -82,10 +109,13 @@ const Formulario = () => {
                                 name = 'email' 
                             >
                             </Field>
+                            {errors.email && touched.email ? (
+                               <Alerta>{errors.email }</Alerta>
+                            ): null}
                         </div>
                         <div className=' mt-4'>
                             <label htmlFor="telefono" className='text-gray-800'>
-                                Telefono:
+                                Teléfono:
                             </label>
                             <Field
                                 id = "telefono"
@@ -95,6 +125,9 @@ const Formulario = () => {
                                 name = 'telefono' 
                             >
                             </Field>
+                            {errors.telefono && touched.telefono ? (
+                               <Alerta>{errors.telefono }</Alerta>
+                            ): null}
                         </div>
                         <div className=' mt-4'>
                             <label htmlFor="notas" className='text-gray-800'>
